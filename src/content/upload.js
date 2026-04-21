@@ -7,6 +7,11 @@ const READ_BYTES = 4096;
 
 initDebugPanel().catch(() => {});
 
+// Nhận message từ service worker (vd: download bị chặn)
+browser.runtime.onMessage.addListener((msg) => {
+  if (msg?.type === 'DLP_SHOW_BANNER') showBlockBanner(msg.message);
+});
+
 /**
  * Drive / SPA hay đặt input file trong Shadow DOM — event.target có thể là host (div), không phải INPUT.
  * Phải dùng composedPath() mới bắt được đúng <input type="file">.

@@ -69,7 +69,8 @@ async function checkAndBlock(id, filename, url) {
       await browser.downloads.cancel(id);
     } catch { /* có thể đã xong */ }
     await logBlockEvent({ type: 'download', reason: 'blocked_filetype', detectedType: label, url, filename });
-    await showBlockNotification({ reason: 'blocked_filetype', detectedType: label });
+    await showBlockNotification({ reason: 'blocked_filetype', detectedType: label, filename });
+    await showBannerOnActiveTab(`🛡️ Download bị chặn: "${filename}" bị phát hiện là ${label}`);
     return true;
   }
 
@@ -82,20 +83,21 @@ function getExt(filename) {
 }
 
 async function showBlockNotification(event) {
-  const messages = {
-    blocked_extension: `Download bị chặn: loại file không được phép`,
-    blocked_filetype: `Download bị chặn: nội dung file nguy hiểm (${event.detectedType})`,
-  };
-
   try {
     await browser.notifications.create({
       type: 'basic',
       iconUrl: browser.runtime.getURL('icons/icon48.png'),
       title: 'DLP Shield - Download bị chặn',
-      message: messages[event.reason] || 'File bị chặn bởi chính sách bảo mật',
+      message: `"${event.filename || event.detectedType}" bị chặn bởi chính sách bảo mật`,
     });
-  } catch {
-    /* thông báo không bắt buộc */
-  }
+  } catch { /* notification không bắt buộc */ }
+}
+
+async function showBannerOnActiveTab(message) {
+  try {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) return;
+    await browser.tabs.sendMessage(tab.id, { type: 'DLP_SHOW_BANNER', message });
+  } catch { /* tab có thể không có content script */ }
 }
 
