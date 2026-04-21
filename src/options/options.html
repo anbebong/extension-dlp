@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DLP Shield — Cấu hình</title>
+  <style>
+    :root {
+      --blue: #1976d2;
+      --blue-dark: #1256a0;
+      --blue-light: #e3f2fd;
+      --red: #d32f2f;
+      --red-light: #fce4e4;
+      --green: #2e7d32;
+      --green-light: #e8f5e9;
+      --orange: #e65100;
+      --orange-light: #fff3e0;
+      --surface: #fff;
+      --bg: #f0f4f8;
+      --border: #dde3ea;
+      --text: #1a2332;
+      --text-muted: #6b7c93;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar layout ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-logo h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sidebar-logo p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    nav { padding: 12px 8px; flex: 1; }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+      margin-bottom: 2px;
+    }
+
+    nav a:hover { background: var(--bg); color: var(--text); }
+    nav a.active { background: var(--blue-light); color: var(--blue); }
+    nav a .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── Main content ── */
+    .main { flex: 1; padding: 32px; max-width: 820px; }
+
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 20px; font-weight: 700; }
+    .page-header p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .card-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .card-icon.blue { background: var(--blue-light); }
+    .card-icon.red { background: var(--red-light); }
+    .card-icon.green { background: var(--green-light); }
+    .card-icon.orange { background: var(--orange-light); }
+
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    .card-body { padding: 16px 20px; }
+
+    /* ── Form elements ── */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label.field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 6px;
+    }
+
+    input[type=text],
+    input[type=url],
+    input[type=number] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+
+    input[type=text]:focus,
+    input[type=url]:focus,
+    input[type=number]:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(25,118,210,.12);
+    }
+
+    .input-row { display: flex; gap: 8px; }
+    .input-row input { flex: 1; }
+
+    /* ── Buttons ── */
+    button {
+      padding: 8px 16px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s, box-shadow .15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--blue-dark); box-shadow: 0 2px 8px rgba(25,118,210,.3); }
+
+    .btn-ghost {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); }
+
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+    .btn-danger-ghost:hover { background: var(--red-light); }
+
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Toggle switch ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+    }
+
+    .toggle-info .toggle-name { font-size: 14px; font-weight: 500; }
+    .toggle-info .toggle-hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .switch {
+      position: relative;
+      width: 46px; height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #c9d0da;
+      border-radius: 26px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+
+    input:checked + .slider { background: var(--blue); }
+    input:checked + .slider::before { transform: translateX(20px); }
+
+    /* ── Tag chips ── */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 10px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 12px;
+      background: var(--blue-light);
+      border: 1px solid #bbdefb;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #1565c0;
+    }
+
+    .tag .tag-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #5c8fcb;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: background .15s, color .15s;
+    }
+
+    .tag .tag-remove:hover { background: #bbdefb; color: var(--red); }
+
+    .tag-empty { font-size: 12px; color: var(--text-muted); font-style: italic; padding: 4px 0; }
+
+    /* ── Status messages ── */
+    .status-msg {
+      font-size: 12px;
+      min-height: 20px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-msg.success { color: var(--green); }
+    .status-msg.error { color: var(--red); }
+    .status-msg.info { color: var(--blue); }
+
+    /* ── Block log ── */
+    .log-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .log-table th {
+      text-align: left;
+      padding: 6px 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .3px;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-table td { padding: 8px 10px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+    .log-table tr:last-child td { border: none; }
+    .log-table tr:hover td { background: var(--bg); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-upload { background: var(--orange-light); color: var(--orange); }
+    .badge-download { background: var(--green-light); color: var(--green); }
+
+    .reason-chip {
+      display: inline-block;
+      padding: 1px 7px;
+      background: var(--bg);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .log-empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; }
+
+    /* ── Sync row ── */
+    .sync-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 14px; }
+    .sync-row .field { flex: 1; margin: 0; }
+
+    /* ── Action bar ── */
+    .action-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 0 0;
+    }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+    /* ── Hint text ── */
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    code { font-family: 'SFMono-Regular', Consolas, monospace; background: var(--bg); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🛡️</div>
+      <h1>DLP Shield</h1>
+      <p>Data Loss Prevention</p>
+    </div>
+
+    <nav>
+      <a href="#status" class="active">
+        <span class="nav-icon">⚡</span> Trạng thái
+      </a>
+      <a href="#domains">
+        <span class="nav-icon">🌐</span> Domain
+      </a>
+      <a href="#filetypes">
+        <span class="nav-icon">📄</span> Loại file
+      </a>
+      <a href="#remote">
+        <span class="nav-icon">☁️</span> Remote sync
+      </a>
+      <a href="#log">
+        <span class="nav-icon">📋</span> Block log
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">v1.0.0 · DLP Shield</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Status -->
+    <section id="status">
+      <div class="page-header">
+        <h2>Cấu hình chính sách</h2>
+        <p>Quản lý danh sách chặn và thiết lập bảo vệ cho trình duyệt</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon blue">⚡</div>
+            <div>
+              <div class="card-title">Bảo vệ DLP</div>
+              <div class="card-desc">Bật/tắt toàn bộ tính năng chặn</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">Kích hoạt DLP Shield</div>
+              <div class="toggle-hint">Chặn upload và download file vi phạm chính sách</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <hr style="margin:16px 0" />
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-name">Panel debug trên trang</div>
+              <div class="toggle-hint">Góc phải dưới: thấy rõ script chạy, từng bước khi chọn file (chỉ máy bạn)</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="debug-ui" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <p class="hint" id="debug-ui-hint" style="margin-top:10px"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Domains -->
+    <section id="domains" style="margin-top:28px">
+      <div class="page-header">
+        <h2>Domain bị chặn</h2>
+        <p>Chặn tất cả upload/download từ các domain trong danh sách</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon red">🌐</div>
+            <div>
+              <div class="card-title">Danh sách domain</div>
+              <div class="card-desc">Hỗ trợ wildcard: <code>*.example.com</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="input-row">
+            <input type="text" id="domain-input" placeholder="evil.com hoặc *.malware.org" />
+            <button class="btn-primary" id="add-domain">+ Thêm</button>
+          </div>
+          <div class="tag-list" id="domain-list">
+            <span class="tag-empty">Chưa có domain nào</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- File types -->
+    <section id="filetypes" style="margin-top:28px">
+      <div class="page-header">
+        <h2>Loại file bị chặn</h2>
+        <p>Chỉ dùng <strong>Magika</strong> (đọc byte đầu file): nhãn/MIME dưới đây — <em>không</em> chặn theo đuôi tên.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;display:none" aria-hidden="true">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon orange">📎</div>
+            <div>
+              <div class="card-title">Extension (legacy)</div>
+              <div class="card-desc">Không còn dùng để chặn</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="input-row">
+            <input type="text" id="ext-input" placeholder=".exe" />
+            <button class="btn-primary" id="add-ext">+ Thêm</button>
+          </div>
+          <div class="tag-list" id="ext-list">
+            <span class="tag-empty">Chưa có extension nào</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon blue">🧠</div>
+            <div>
+              <div class="card-title">MIME type / Magika label</div>
+              <div class="card-desc">Phát hiện qua AI — ví dụ: <code>exe</code>, <code>shell</code>, <code>application/x-sh</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="input-row">
+            <input type="text" id="mime-input" placeholder="exe hoặc application/x-msdownload" />
+            <button class="btn-primary" id="add-mime">+ Thêm</button>
+          </div>
+          <div class="tag-list" id="mime-list">
+            <span class="tag-empty">Chưa có MIME type nào</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Remote sync -->
+    <section id="remote" style="margin-top:28px">
+      <div class="page-header">
+        <h2>Đồng bộ từ server</h2>
+        <p>Fetch chính sách tập trung từ URL — tự động merge với cấu hình local</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon green">☁️</div>
+            <div>
+              <div class="card-title">Remote Policy</div>
+              <div class="card-desc">Server phải trả về JSON chứa <code>blockedDomains</code>, <code>blockedExtensions</code>, <code>blockedMimeTypes</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label class="field-label" for="remote-url">URL Policy</label>
+            <input type="url" id="remote-url" placeholder="https://company.internal/dlp-policy.json" />
+          </div>
+
+          <div class="sync-row">
+            <div class="field">
+              <label class="field-label" for="sync-interval">Chu kỳ đồng bộ (phút)</label>
+              <input type="number" id="sync-interval" min="5" max="1440" value="60" style="width:120px" />
+            </div>
+            <button class="btn-ghost" id="sync-now">↻ Sync ngay</button>
+          </div>
+
+          <div class="status-msg" id="sync-status"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Block log -->
+    <section id="log" style="margin-top:28px">
+      <div class="page-header">
+        <h2>Lịch sử block</h2>
+        <p>100 sự kiện gần nhất được ghi lại</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon blue">📋</div>
+            <div>
+              <div class="card-title">Block log</div>
+            </div>
+          </div>
+          <button class="btn-ghost btn-sm" id="clear-log">Xóa log</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div id="block-log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="btn-danger-ghost" id="reset-btn">Đặt lại mặc định</button>
+      <button class="btn-primary" id="save-btn">Lưu cấu hình</button>
+    </div>
+    <div class="status-msg" id="save-status" style="justify-content:flex-end"></div>
+
+  </main>
+</div>
+<script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    :root {
+      --blue: #1976d2;
+      --blue-dark: #1256a0;
+      --blue-light: #e3f2fd;
+      --red: #d32f2f;
+      --green: #2e7d32;
+      --green-bg: #e8f5e9;
+      --orange: #e65100;
+      --orange-bg: #fff3e0;
+      --surface: #fff;
+      --bg: #f0f4f8;
+      --border: #dde3ea;
+      --text: #1a2332;
+      --text-muted: #6b7c93;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      width: 300px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 36px; height: 36px;
+      background: var(--blue);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 { font-size: 15px; font-weight: 700; }
+    .header-text p { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ── Status pill ── */
+    .status-pill {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-pill.on { background: var(--green-bg); color: var(--green); }
+    .status-pill.off { background: var(--bg); color: var(--text-muted); }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── Body ── */
+    .body { padding: 14px 16px; }
+
+    /* ── Master toggle ── */
+    .toggle-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .toggle-info .toggle-name { font-size: 13px; font-weight: 600; }
+    .toggle-info .toggle-hint { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute; inset: 0;
+      background: #c9d0da;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+
+    input:checked + .slider { background: var(--blue); }
+    input:checked + .slider::before { transform: translateX(18px); }
+
+    /* ── Stats ── */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+    .stat {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .stat-icon { font-size: 18px; margin-bottom: 6px; }
+
+    .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-num.upload { color: var(--orange); }
+    .stat-num.download { color: var(--blue); }
+
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Recent events ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .event-list { margin-bottom: 14px; }
+
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .event-item:last-child { border: none; }
+
+    .event-badge {
+      flex-shrink: 0;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .event-badge.upload { background: var(--orange-bg); color: var(--orange); }
+    .event-badge.download { background: var(--green-bg); color: var(--green); }
+
+    .event-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+
+    .event-time { color: var(--text-muted); flex-shrink: 0; font-size: 11px; }
+
+    .no-events {
+      text-align: center;
+      padding: 12px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Footer button ── */
+    .btn-options {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 9px;
+      background: var(--blue-light);
+      border: none;
+      border-radius: 8px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-options:hover { background: #bbdefb; }
+
+    .ping-row { margin-bottom: 12px; }
+    .btn-ping {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-ping:hover { background: #e2e8f0; }
+    .ping-result {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-muted);
+      min-height: 2.8em;
+      word-break: break-word;
+    }
+    .ping-result.ok { color: var(--green); }
+    .ping-result.err { color: var(--red); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">🛡️</div>
+    <div class="header-text">
+      <h1>DLP Shield</h1>
+      <p>Data Loss Prevention</p>
+    </div>
+    <div class="status-pill on" id="status-pill">
+      <span class="status-dot"></span>
+      <span id="status-text">Bật</span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Master toggle -->
+    <div class="toggle-card">
+      <div class="toggle-info">
+        <div class="toggle-name">Bảo vệ DLP</div>
+        <div class="toggle-hint" id="toggle-hint">Đang chặn upload &amp; download</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon">⬆️</div>
+        <div class="stat-num upload" id="upload-count">0</div>
+        <div class="stat-lbl">Upload bị chặn</div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">⬇️</div>
+        <div class="stat-num download" id="download-count">0</div>
+        <div class="stat-lbl">Download bị chặn</div>
+      </div>
+    </div>
+
+    <!-- Recent events -->
+    <div class="section-title">Gần đây</div>
+    <div class="event-list" id="event-list">
+      <div class="no-events">Chưa có sự kiện nào</div>
+    </div>
+
+    <div class="ping-row">
+      <button type="button" class="btn-ping" id="btn-ping">🔌 Kiểm tra service worker</button>
+      <div class="ping-result" id="ping-result"></div>
+    </div>
+
+    <div class="ping-row">
+      <button type="button" class="btn-ping" id="btn-magika-test">🧪 Thử Magika (file giả MZ)</button>
+      <div class="ping-result" id="magika-result"></div>
+    </div>
+
+    <button class="btn-options" id="open-options">
+      ⚙️ Mở cấu hình đầy đủ
+    </button>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
