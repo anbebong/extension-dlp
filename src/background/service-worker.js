@@ -63,22 +63,28 @@ async function handleClassifyAndCheck({ filename, bytes, domain }) {
     return { blocked: false };
   }
 
-  // Lớp 2: Magika AI
+  // Lớp 2: Magika AI + extension fallback
   if (bytes && bytes.length > 0) {
     const uint8 = new Uint8Array(bytes);
     const { label: rawLabel } = await classifyBytes(uint8);
     const label = resolveEffectiveLabel(uint8, rawLabel);
     const mime  = labelToMime(label);
 
-    const wouldBlock = isMimeTypeBlocked(mime, policy, 'upload') || isMimeTypeBlocked(label, policy, 'upload');
-    console.log(`[DLP] upload "${filename}": raw=${rawLabel} → effective=${label} → mime=${mime} → block=${wouldBlock}`);
+    // Fallback: nếu Magika trả label ZIP-generic (zip/xpi/jar...) nhưng extension khớp
+    // định dạng cụ thể hơn → dùng extension để xác nhận
+    const extLabel = getExtLabel(filename);
+    const effectiveLabel = (extLabel && isZipGeneric(label)) ? extLabel : label;
+    const effectiveMime  = labelToMime(effectiveLabel);
+
+    const wouldBlock = isMimeTypeBlocked(effectiveMime, policy, 'upload') || isMimeTypeBlocked(effectiveLabel, policy, 'upload');
+    console.log(`[DLP] upload "${filename}": raw=${rawLabel} → magika=${label} → effective=${effectiveLabel} → block=${wouldBlock}`);
 
     // Ghi debug event ra storage để debug panel trên trang hiện real-time
-    saveDebugEvent({ filename, raw: rawLabel, label, mime, blocked: wouldBlock });
+    saveDebugEvent({ filename, raw: rawLabel, label: effectiveLabel, mime: effectiveMime, blocked: wouldBlock });
 
     if (wouldBlock) {
-      await logBlockEvent({ type: 'upload', reason: 'blocked_filetype', filename, detectedType: label });
-      return { blocked: true, reason: `Nội dung file bị phát hiện là "${label}" — không được phép upload` };
+      await logBlockEvent({ type: 'upload', reason: 'blocked_filetype', filename, detectedType: effectiveLabel });
+      return { blocked: true, reason: `File "${filename}" bị phát hiện là "${effectiveLabel}" — không được phép upload` };
     }
   }
 
@@ -106,6 +112,30 @@ async function selfTestMagika() {
 function saveDebugEvent(data) {
   // Ghi vào storage.local — debug panel lắng nghe onChanged để hiện real-time
   chrome.storage.local.set({ dlpLastDebugEvent: { ...data, ts: Date.now() } }).catch(() => {});
+}
+
+// Các label ZIP-based mà Magika hay nhầm lẫn với nhau
+const ZIP_GENERIC_LABELS = new Set(['zip', 'xpi', 'jar', 'apk', 'ooxml', 'crx', 'nupkg']);
+
+function isZipGeneric(label) {
+  return ZIP_GENERIC_LABELS.has((label || '').toLowerCase());
+}
+
+// Map extension → label (dùng để fallback khi Magika nhầm ZIP-family)
+const EXT_LABEL_MAP = {
+  '.docx': 'docx', '.doc': 'ooxml', '.dotx': 'docx',
+  '.xlsx': 'xlsx', '.xls': 'ooxml', '.xlsb': 'xlsx',
+  '.pptx': 'pptx', '.ppt': 'ooxml',
+  '.odt': 'odt', '.ods': 'ods', '.odp': 'odp',
+  '.pdf': 'pdf', '.rtf': 'rtf', '.csv': 'csv',
+  '.zip': 'zip', '.jar': 'jar', '.apk': 'apk',
+};
+
+function getExtLabel(filename) {
+  const ext = ((filename || '').lastIndexOf('.') >= 0)
+    ? filename.slice(filename.lastIndexOf('.')).toLowerCase()
+    : '';
+  return EXT_LABEL_MAP[ext] || null;
 }
 
 function setupAlarms() {

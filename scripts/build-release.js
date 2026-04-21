@@ -56,7 +56,7 @@ async function main() {
 
     // Webpack build offline mode
     execSync(
-      `npx webpack --env browser=${browser} --env localModel=true`,
+      `node node_modules/webpack/bin/webpack.js --env browser=${browser} --env localModel=true`,
       { cwd: ROOT, stdio: 'inherit' }
     );
 

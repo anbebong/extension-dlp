@@ -16,7 +16,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "magika": "^0.3.2",
+    "magika": "^1.0.0",
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
