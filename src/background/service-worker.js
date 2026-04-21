@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill';
 import {
   loadPolicy, syncRemotePolicy,
-  isDomainBlocked, isExtensionBlocked, isMimeTypeBlocked, logBlockEvent,
+  isDomainAllowed, isMimeTypeBlocked, logBlockEvent,
 } from './policy.js';
 import { classifyBytes, labelToMime, resolveEffectiveLabel, isMagikaReady } from './magika.js';
 import { initDownloadBlocker } from './download.js';
@@ -58,28 +58,25 @@ async function handleClassifyAndCheck({ filename, bytes, domain }) {
   const policy = await loadPolicy();
   if (!policy.enabled) return { blocked: false };
 
-  // Lớp 1: domain
-  if (domain && isDomainBlocked(`https://${domain}`, policy)) {
-    await logBlockEvent({ type: 'upload', reason: 'blocked_domain', domain, filename });
-    return { blocked: true, reason: 'Domain này bị chặn bởi chính sách bảo mật' };
+  // Lớp 1: domain allowlist — domain trong list thì bỏ qua chặn file type
+  if (domain && isDomainAllowed(`https://${domain}`, policy)) {
+    return { blocked: false };
   }
 
-  // Lớp 2: extension file (nếu blockedExtensions có cấu hình)
-  if (isExtensionBlocked(filename, policy)) {
-    await logBlockEvent({ type: 'upload', reason: 'blocked_extension', filename });
-    return { blocked: true, reason: `Loại file "${getExt(filename)}" không được phép upload` };
-  }
-
-  // Lớp 3: Magika AI + heuristic fallback
+  // Lớp 2: Magika AI
   if (bytes && bytes.length > 0) {
     const uint8 = new Uint8Array(bytes);
     const { label: rawLabel } = await classifyBytes(uint8);
     const label = resolveEffectiveLabel(uint8, rawLabel);
     const mime  = labelToMime(label);
 
-    console.log(`[DLP] classify "${filename}": raw=${rawLabel} → effective=${label} → mime=${mime}`);
+    const wouldBlock = isMimeTypeBlocked(mime, policy, 'upload') || isMimeTypeBlocked(label, policy, 'upload');
+    console.log(`[DLP] upload "${filename}": raw=${rawLabel} → effective=${label} → mime=${mime} → block=${wouldBlock}`);
 
-    if (isMimeTypeBlocked(mime, policy) || isMimeTypeBlocked(label, policy)) {
+    // Ghi debug event ra storage để debug panel trên trang hiện real-time
+    saveDebugEvent({ filename, raw: rawLabel, label, mime, blocked: wouldBlock });
+
+    if (wouldBlock) {
       await logBlockEvent({ type: 'upload', reason: 'blocked_filetype', filename, detectedType: label });
       return { blocked: true, reason: `Nội dung file bị phát hiện là "${label}" — không được phép upload` };
     }
@@ -94,7 +91,7 @@ async function selfTestMagika() {
   const { label: rawLabel } = await classifyBytes(mz);
   const label = resolveEffectiveLabel(mz, rawLabel);
   const mime  = labelToMime(label);
-  const wouldBlock = isMimeTypeBlocked(mime, policy) || isMimeTypeBlocked(label, policy);
+  const wouldBlock = isMimeTypeBlocked(mime, policy, 'upload') || isMimeTypeBlocked(label, policy, 'upload');
   return {
     ok: true,
     magikaRawLabel: rawLabel,
@@ -106,9 +103,9 @@ async function selfTestMagika() {
   };
 }
 
-function getExt(filename) {
-  const i = (filename || '').lastIndexOf('.');
-  return i >= 0 ? filename.slice(i) : '';
+function saveDebugEvent(data) {
+  // Ghi vào storage.local — debug panel lắng nghe onChanged để hiện real-time
+  chrome.storage.local.set({ dlpLastDebugEvent: { ...data, ts: Date.now() } }).catch(() => {});
 }
 
 function setupAlarms() {

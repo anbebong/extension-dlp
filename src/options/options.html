@@ -262,6 +262,21 @@
     input:checked + .slider { background: var(--blue); }
     input:checked + .slider::before { transform: translateX(20px); }
 
+    /* ── Type groups (checkbox UI) ── */
+    .type-group { margin-bottom: 16px; }
+    .type-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .type-group-title { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; padding-left: 24px; }
+    .type-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 13px;
+      border: 1px solid transparent;
+      transition: background 0.15s;
+    }
+    .type-item:hover { background: var(--blue-light); border-color: #bbdefb; }
+    .type-item input[type=checkbox] { accent-color: var(--primary); width: 14px; height: 14px; cursor: pointer; }
+    .type-label-code { margin-left: auto; font-size: 10px; color: var(--text-muted); background: #f0f0f0; padding: 1px 5px; border-radius: 4px; }
+
     /* ── Tag chips ── */
     .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 10px; }
 
@@ -454,8 +469,8 @@
     <!-- Domains -->
     <section id="domains" style="margin-top:28px">
       <div class="page-header">
-        <h2>Domain bị chặn</h2>
-        <p>Chặn tất cả upload/download từ các domain trong danh sách</p>
+        <h2>Domain được phép</h2>
+        <p>Domain trong danh sách sẽ <strong>không bị chặn</strong> — cho phép upload/download bình thường</p>
       </div>
 
       <div class="card">
@@ -463,14 +478,14 @@
           <div class="card-header-left">
             <div class="card-icon red">🌐</div>
             <div>
-              <div class="card-title">Danh sách domain</div>
+              <div class="card-title">Danh sách domain được phép</div>
               <div class="card-desc">Hỗ trợ wildcard: <code>*.example.com</code></div>
             </div>
           </div>
         </div>
         <div class="card-body">
           <div class="input-row">
-            <input type="text" id="domain-input" placeholder="evil.com hoặc *.malware.org" />
+            <input type="text" id="domain-input" placeholder="drive.google.com hoặc *.company.com" />
             <button class="btn-primary" id="add-domain">+ Thêm</button>
           </div>
           <div class="tag-list" id="domain-list">
@@ -484,48 +499,38 @@
     <section id="filetypes" style="margin-top:28px">
       <div class="page-header">
         <h2>Loại file bị chặn</h2>
-        <p>Chỉ dùng <strong>Magika</strong> (đọc byte đầu file): nhãn/MIME dưới đây — <em>không</em> chặn theo đuôi tên.</p>
+        <p>Dùng <strong>Magika AI</strong> nhận dạng theo nội dung bytes — không phụ thuộc đuôi tên file.</p>
       </div>
 
-      <div class="card" style="margin-bottom:12px;display:none" aria-hidden="true">
+      <!-- Upload rules -->
+      <div class="card" style="margin-bottom:12px">
         <div class="card-header">
           <div class="card-header-left">
-            <div class="card-icon orange">📎</div>
+            <div class="card-icon blue">⬆️</div>
             <div>
-              <div class="card-title">Extension (legacy)</div>
-              <div class="card-desc">Không còn dùng để chặn</div>
+              <div class="card-title">Chặn Upload</div>
+              <div class="card-desc">Tick chọn định dạng cần chặn — Magika nhận dạng theo nội dung bytes, không theo đuôi tên</div>
             </div>
           </div>
         </div>
         <div class="card-body">
-          <div class="input-row">
-            <input type="text" id="ext-input" placeholder=".exe" />
-            <button class="btn-primary" id="add-ext">+ Thêm</button>
-          </div>
-          <div class="tag-list" id="ext-list">
-            <span class="tag-empty">Chưa có extension nào</span>
-          </div>
+          <div id="upload-groups"></div>
         </div>
       </div>
 
+      <!-- Download rules -->
       <div class="card">
         <div class="card-header">
           <div class="card-header-left">
-            <div class="card-icon blue">🧠</div>
+            <div class="card-icon orange">⬇️</div>
             <div>
-              <div class="card-title">MIME type / Magika label</div>
-              <div class="card-desc">Phát hiện qua AI — ví dụ: <code>exe</code>, <code>shell</code>, <code>application/x-sh</code></div>
+              <div class="card-title">Chặn Download</div>
+              <div class="card-desc">Tick chọn định dạng cần chặn khi người dùng download</div>
             </div>
           </div>
         </div>
         <div class="card-body">
-          <div class="input-row">
-            <input type="text" id="mime-input" placeholder="exe hoặc application/x-msdownload" />
-            <button class="btn-primary" id="add-mime">+ Thêm</button>
-          </div>
-          <div class="tag-list" id="mime-list">
-            <span class="tag-empty">Chưa có MIME type nào</span>
-          </div>
+          <div id="download-groups"></div>
         </div>
       </div>
     </section>
@@ -543,7 +548,7 @@
             <div class="card-icon green">☁️</div>
             <div>
               <div class="card-title">Remote Policy</div>
-              <div class="card-desc">Server phải trả về JSON chứa <code>blockedDomains</code>, <code>blockedExtensions</code>, <code>blockedMimeTypes</code></div>
+              <div class="card-desc">Server phải trả về JSON chứa <code>allowedDomains</code>, <code>blockedExtensions</code>, <code>blockedMimeTypes</code></div>
             </div>
           </div>
         </div>

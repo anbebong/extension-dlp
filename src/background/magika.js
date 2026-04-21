@@ -84,42 +84,64 @@ export function isMagikaReady() {
 // ── Label → MIME ─────────────────────────────────────────────────────────────
 
 const LABEL_TO_MIME = {
+  // Tài liệu
+  pdf:        'application/pdf',
+  docx:       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  doc:        'application/msword',
+  xlsx:       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xls:        'application/vnd.ms-excel',
+  pptx:       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  ppt:        'application/vnd.ms-powerpoint',
+  ooxml:      'application/vnd.ms-office',
+  odt:        'application/vnd.oasis.opendocument.text',
+  ods:        'application/vnd.oasis.opendocument.spreadsheet',
+  odp:        'application/vnd.oasis.opendocument.presentation',
+  rtf:        'application/rtf',
+  csv:        'text/csv',
+  // Hình ảnh
+  jpeg:       'image/jpeg',
+  png:        'image/png',
+  gif:        'image/gif',
+  bmp:        'image/bmp',
+  tiff:       'image/tiff',
+  webp:       'image/webp',
+  svg:        'image/svg+xml',
+  psd:        'image/vnd.adobe.photoshop',
+  // Video / Audio
+  mp4:        'video/mp4',
+  mkv:        'video/x-matroska',
+  avi:        'video/x-msvideo',
+  mp3:        'audio/mpeg',
+  wav:        'audio/wav',
+  flac:       'audio/flac',
+  // Archive
+  zip:        'application/zip',
+  rar:        'application/vnd.rar',
+  sevenzip:   'application/x-7z-compressed',
+  gzip:       'application/gzip',
+  tar:        'application/x-tar',
+  // Executable / Script
+  pebin:      'application/x-msdownload',
   exe:        'application/x-msdownload',
   elf:        'application/x-executable',
   shell:      'application/x-sh',
-  bat:        'application/x-bat',
-  jar:        'application/java-archive',
-  msi:        'application/x-msi',
+  batch:      'application/x-bat',
   powershell: 'application/x-powershell',
   vba:        'application/x-vba',
-  dex:        'application/x-android-dex',
-  macho:      'application/x-mach-binary',
+  jar:        'application/java-archive',
+  apk:        'application/vnd.android.package-archive',
+  // Dữ liệu nhạy cảm
+  sqlite:     'application/x-sqlite3',
+  pem:        'application/x-pem-file',
+  pgp:        'application/pgp-keys',
+  outlook:    'application/vnd.ms-outlook',
+  eml:        'message/rfc822',
 };
 
 export function labelToMime(label) {
   return LABEL_TO_MIME[label?.toLowerCase()] || `application/x-${label}`;
 }
 
-/**
- * Nếu Magika trả 'unknown', dùng heuristic byte-header để vẫn chặn được
- * PE (MZ), ELF, shebang script.
- */
 export function resolveEffectiveLabel(bytes, magikaLabel) {
-  const raw = (magikaLabel || 'unknown').toLowerCase();
-  if (raw && raw !== 'unknown') return magikaLabel;
-
-  if (!bytes || bytes.length < 2) return magikaLabel || 'unknown';
-
-  // MZ header → Windows PE executable
-  if (bytes[0] === 0x4d && bytes[1] === 0x5a) return 'exe';
-  // ELF header → Linux/Unix executable
-  if (
-    bytes.length >= 4 &&
-    bytes[0] === 0x7f && bytes[1] === 0x45 &&
-    bytes[2] === 0x4c && bytes[3] === 0x46
-  ) return 'elf';
-  // Shebang → shell script
-  if (bytes[0] === 0x23 && bytes[1] === 0x21) return 'shell';
-
   return magikaLabel || 'unknown';
 }

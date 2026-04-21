@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = (env) => {
   const browser = env.browser || 'chrome';
@@ -48,7 +49,12 @@ module.exports = (env) => {
       ],
     },
     resolve: { extensions: ['.js'] },
-    plugins: [new CopyPlugin({ patterns: copyPatterns })],
+    plugins: [
+      new CopyPlugin({ patterns: copyPatterns }),
+      new webpack.DefinePlugin({
+        __DLP_LOCAL_MODEL__: JSON.stringify(offline),
+      }),
+    ],
     experiments: { asyncWebAssembly: true },
   };
 };

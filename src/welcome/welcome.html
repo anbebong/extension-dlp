@@ -5,649 +5,198 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DLP Shield — Hướng dẫn sử dụng</title>
   <style>
-    :root {
-      --blue: #1976d2;
-      --blue-dark: #1256a0;
-      --blue-light: #e3f2fd;
-      --red: #d32f2f;
-      --red-light: #fdecea;
-      --green: #2e7d32;
-      --green-light: #e8f5e9;
-      --orange: #e65100;
-      --orange-light: #fff3e0;
-      --surface: #fff;
-      --bg: #f0f4f8;
-      --border: #dde3ea;
-      --text: #1a2332;
-      --text-muted: #6b7c93;
-    }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #f0f4f8;
+      color: #1a2332;
       font-size: 15px;
       line-height: 1.6;
     }
 
-    /* ── Hero ── */
     .hero {
-      background: linear-gradient(135deg, #1565c0 0%, #1976d2 60%, #42a5f5 100%);
-      color: #fff;
-      text-align: center;
-      padding: 56px 24px 48px;
-    }
-
-    .hero-icon {
-      width: 72px; height: 72px;
-      background: rgba(255,255,255,.15);
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      margin-bottom: 20px;
-      backdrop-filter: blur(8px);
-    }
-
-    .hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
-    .hero p { font-size: 16px; opacity: .85; max-width: 520px; margin: 0 auto 28px; }
-
-    .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-
-    .badge-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 14px;
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.3);
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    /* ── Layout ── */
-    .container { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
-
-    /* ── Section headers ── */
-    .section-header { margin-bottom: 24px; }
-    .section-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .section-header p { font-size: 14px; color: var(--text-muted); }
-
-    /* ── Steps ── */
-    .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
-
-    .step {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-    }
-
-    .step-num {
-      width: 36px; height: 36px;
-      background: var(--blue);
-      color: #fff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .step-content h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-    .step-content p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
-    .step-content p:last-child { margin-bottom: 0; }
-
-    /* ── Screenshot mockup ── */
-    .mockup {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 13px;
-      margin-top: 12px;
-    }
-
-    .mockup-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-red { background: #ff5f57; }
-    .dot-yellow { background: #ffbd2e; }
-    .dot-green { background: #28c840; }
-    .mockup-title { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-
-    /* Popup mockup */
-    .popup-mock {
-      width: 260px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,.1);
-      margin-top: 12px;
-    }
-
-    .pm-header {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .pm-logo {
-      width: 30px; height: 30px;
-      background: var(--blue);
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
-    }
-
-    .pm-name { font-size: 13px; font-weight: 700; }
-    .pm-sub { font-size: 10px; color: var(--text-muted); }
-
-    .pm-pill {
-      margin-left: auto;
-      background: var(--green-light);
-      color: var(--green);
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .pm-body { padding: 12px 14px; }
-
-    .pm-toggle {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      font-size: 12px;
-    }
-
-    .pm-toggle-name { font-weight: 600; font-size: 12px; }
-    .pm-toggle-hint { font-size: 10px; color: var(--text-muted); }
-
-    .switch-mock {
-      width: 36px; height: 20px;
-      background: var(--blue);
-      border-radius: 20px;
-      position: relative;
-    }
-
-    .switch-mock::after {
-      content: '';
-      position: absolute;
-      width: 14px; height: 14px;
-      background: #fff;
-      border-radius: 50%;
-      top: 3px; right: 3px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.2);
-    }
-
-    .pm-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-
-    .pm-stat {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-    }
-
-    .pm-stat-num { font-size: 20px; font-weight: 700; }
-    .pm-stat-num.upload { color: var(--orange); }
-    .pm-stat-num.download { color: var(--blue); }
-    .pm-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-
-    .pm-btn {
-      display: block;
-      width: 100%;
-      padding: 8px;
-      background: var(--blue-light);
-      color: var(--blue);
-      border-radius: 7px;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    /* ── Banner mockup ── */
-    .banner-mock {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--red);
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      margin-top: 12px;
-      box-shadow: 0 4px 12px rgba(211,47,47,.3);
-    }
-
-    /* ── Feature grid ── */
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px;
-      margin-bottom: 48px;
-    }
-
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .feature-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-
-    .feature-icon.blue { background: var(--blue-light); }
-    .feature-icon.red { background: var(--red-light); }
-    .feature-icon.green { background: var(--green-light); }
-    .feature-icon.orange { background: var(--orange-light); }
-
-    .feature-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-    .feature-card p { font-size: 13px; color: var(--text-muted); }
-
-    /* ── Policy table ── */
-    .policy-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 12px;
-    }
-
-    .policy-table th {
-      background: var(--bg);
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .3px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .policy-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-
-    .policy-table tr:last-child td { border: none; }
-    .policy-table tr:hover td { background: var(--bg); }
-
-    code {
-      font-family: 'SFMono-Regular', Consolas, monospace;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-
-    /* ── Q&A ── */
-    .qa-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 48px; }
-
-    .qa {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 20px;
-    }
-
-    .qa-q { font-weight: 600; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
-    .qa-q::before { content: 'Q'; background: var(--blue); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
-    .qa-a { font-size: 14px; color: var(--text-muted); padding-left: 28px; }
-
-    /* ── CTA ── */
-    .cta {
       background: linear-gradient(135deg, #1565c0, #1976d2);
       color: #fff;
-      border-radius: 16px;
-      padding: 32px;
       text-align: center;
-      margin-bottom: 48px;
+      padding: 48px 24px 40px;
+    }
+    .hero-icon { font-size: 48px; margin-bottom: 14px; }
+    .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .hero p { font-size: 15px; opacity: .85; max-width: 480px; margin: 0 auto; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 40px 24px 60px; }
+
+    h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+    .step {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      background: #1976d2;
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .step p { font-size: 13px; color: #6b7c93; }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 40px; }
+    .feature {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .feature-icon { font-size: 22px; margin-bottom: 8px; }
+    .feature h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .feature p { font-size: 13px; color: #6b7c93; }
+
+    /* FAQ */
+    .faq { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+    .faq-item {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .faq-q { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .faq-a { font-size: 13px; color: #6b7c93; }
+
+    code {
+      background: #f0f4f8;
+      border: 1px solid #dde3ea;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
     }
 
-    .cta h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .cta p { font-size: 14px; opacity: .85; margin-bottom: 20px; }
+    hr { border: none; border-top: 1px solid #dde3ea; margin: 32px 0; }
 
-    .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
-    .btn-cta {
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-size: 14px;
+    /* CTA */
+    .cta {
+      background: #1976d2;
+      color: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+    }
+    .cta h2 { color: #fff; margin-bottom: 8px; }
+    .cta p { font-size: 13px; opacity: .85; margin-bottom: 20px; }
+    .cta-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 9px 20px;
+      border-radius: 7px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       border: none;
-      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
-
-    .btn-cta-white { background: #fff; color: var(--blue); }
-    .btn-cta-white:hover { background: #f0f4f8; }
-    .btn-cta-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.5); }
-    .btn-cta-outline:hover { background: rgba(255,255,255,.1); }
-
-    /* ── Divider ── */
-    .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
-
-    /* ── Tag ── */
-    .tag-inline {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: var(--blue-light); color: #1565c0;
-      border: 1px solid #bbdefb;
-      border-radius: 20px; padding: 2px 10px;
-      font-size: 12px; font-weight: 500;
-    }
+    .btn-white { background: #fff; color: #1976d2; }
+    .btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.5); }
   </style>
 </head>
 <body>
 
-<!-- Hero -->
 <div class="hero">
   <div class="hero-icon">🛡️</div>
-  <h1>DLP Shield</h1>
-  <p>Extension bảo vệ dữ liệu — ngăn chặn upload/download file nguy hiểm trực tiếp trên trình duyệt</p>
-  <div class="hero-badges">
-    <span class="badge-pill">🧠 Google Magika AI</span>
-    <span class="badge-pill">🌐 Chrome · Edge · Firefox</span>
-    <span class="badge-pill">🔒 Chạy hoàn toàn offline</span>
-  </div>
+  <h1>DLP Shield đã được cài đặt</h1>
+  <p>Ngăn chặn upload/download file theo chính sách — hỗ trợ nhận dạng AI qua Google Magika</p>
 </div>
 
 <div class="container">
 
-  <!-- Quick start -->
-  <div class="section-header">
-    <h2>⚡ Bắt đầu nhanh</h2>
-    <p>Làm theo 3 bước để extension hoạt động đầy đủ</p>
-  </div>
-
-  <div class="steps" style="margin-bottom:48px">
-
+  <h2>⚡ Bắt đầu nhanh</h2>
+  <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-content">
-        <h3>Kiểm tra icon trên thanh toolbar</h3>
-        <p>Sau khi cài, icon 🛡️ xuất hiện trên thanh công cụ. Click vào để mở popup — nếu thấy trạng thái <strong>Bật</strong> màu xanh là extension đã sẵn sàng.</p>
-        <div class="popup-mock">
-          <div class="pm-header">
-            <div class="pm-logo">🛡️</div>
-            <div>
-              <div class="pm-name">DLP Shield</div>
-              <div class="pm-sub">Data Loss Prevention</div>
-            </div>
-            <div class="pm-pill">● Bật</div>
-          </div>
-          <div class="pm-body">
-            <div class="pm-toggle">
-              <div>
-                <div class="pm-toggle-name">Bảo vệ DLP</div>
-                <div class="pm-toggle-hint">Đang chặn upload &amp; download</div>
-              </div>
-              <div class="switch-mock"></div>
-            </div>
-            <div class="pm-stats">
-              <div class="pm-stat">
-                <div class="pm-stat-num upload">0</div>
-                <div class="pm-stat-lbl">Upload bị chặn</div>
-              </div>
-              <div class="pm-stat">
-                <div class="pm-stat-num download">0</div>
-                <div class="pm-stat-lbl">Download bị chặn</div>
-              </div>
-            </div>
-            <div class="pm-btn">⚙️ Mở cấu hình đầy đủ</div>
-          </div>
-        </div>
+      <div>
+        <h3>Kiểm tra extension đã hoạt động</h3>
+        <p>Click icon 🛡️ trên toolbar → nhấn <strong>"Kiểm tra service worker"</strong> → phải thấy <strong>OK · magikaReady: true</strong>. Nếu chưa ready, đợi ~5 giây rồi thử lại (model đang tải).</p>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">2</div>
-      <div class="step-content">
-        <h3>Thêm domain và loại file cần chặn</h3>
-        <p>Click <strong>"Mở cấu hình đầy đủ"</strong> trong popup để vào trang Options. Tại đây bạn thêm:</p>
-        <table class="policy-table" style="margin-top:12px">
-          <thead>
-            <tr>
-              <th>Mục cấu hình</th>
-              <th>Ví dụ</th>
-              <th>Tác dụng</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Domain bị chặn</strong></td>
-              <td><code>evil.com</code><br><code>*.malware.org</code></td>
-              <td>Chặn toàn bộ upload/download từ domain này</td>
-            </tr>
-            <tr>
-              <td><strong>Extension file</strong></td>
-              <td><code>.exe</code> <code>.bat</code> <code>.ps1</code></td>
-              <td>Chặn file có đuôi này dù ở bất kỳ domain nào</td>
-            </tr>
-            <tr>
-              <td><strong>MIME / Magika label</strong></td>
-              <td><code>exe</code> <code>shell</code> <code>elf</code></td>
-              <td>AI phát hiện loại file thực — bypass đổi tên</td>
-            </tr>
-          </tbody>
-        </table>
-        <p style="margin-top:10px;font-size:13px;color:var(--text-muted)">
-          💡 Nhập từng mục rồi nhấn <strong>Enter</strong> hoặc nút <strong>+ Thêm</strong>, sau đó nhấn <strong>Lưu cấu hình</strong>.
-        </p>
+      <div>
+        <h3>Cấu hình loại file cần chặn</h3>
+        <p>Click <strong>"Mở cấu hình"</strong> → vào mục <strong>Loại file bị chặn</strong> → tick chọn định dạng muốn chặn riêng cho Upload và Download → nhấn <strong>Lưu cấu hình</strong>.</p>
       </div>
     </div>
-
     <div class="step">
       <div class="step-num">3</div>
-      <div class="step-content">
-        <h3>Kiểm tra hoạt động</h3>
-        <p>Thử upload một file <code>.exe</code> lên bất kỳ trang web nào — extension sẽ chặn ngay và hiện banner đỏ:</p>
-        <div class="banner-mock">
-          🛡️ &nbsp;Loại file ".exe" không được phép upload
-          <span style="margin-left:auto;opacity:.7;font-size:18px;cursor:pointer">✕</span>
-        </div>
-        <p style="margin-top:12px;font-size:13px;color:var(--text-muted)">
-          Với download: file sẽ bị cancel và hiện browser notification ở góc màn hình.
-        </p>
+      <div>
+        <h3>Thêm domain được phép (tuỳ chọn)</h3>
+        <p>Vào mục <strong>Domain được phép</strong> → thêm domain nội bộ (vd: <code>*.company.com</code>) → các domain này sẽ bỏ qua mọi kiểm tra file.</p>
       </div>
     </div>
-
   </div>
 
-  <hr class="divider">
+  <hr>
 
-  <!-- Features -->
-  <div class="section-header">
-    <h2>🔍 Extension hoạt động thế nào?</h2>
-    <p>Ba lớp kiểm tra độc lập — file phải qua cả ba mới được phép</p>
-  </div>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon red">🌐</div>
-      <h3>Lớp 1 — Domain</h3>
-      <p>Kiểm tra domain của trang (upload) hoặc URL tải về (download). Hỗ trợ wildcard <code>*.example.com</code>.</p>
+  <h2>🔍 Cách hoạt động</h2>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">⬆️</div>
+      <h3>Chặn Upload</h3>
+      <p>Đọc bytes đầu file khi người dùng chọn file qua <code>input[type=file]</code>, gửi sang Magika AI để nhận dạng, chặn nếu vi phạm policy.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon orange">📎</div>
-      <h3>Lớp 2 — Extension file</h3>
-      <p>Kiểm tra đuôi file: <code>.exe</code>, <code>.bat</code>, <code>.ps1</code>... Không phân biệt HOA/thường.</p>
+    <div class="feature">
+      <div class="feature-icon">⬇️</div>
+      <h3>Chặn Download</h3>
+      <p>Bắt sự kiện download sau khi Chrome nhận được tên file thật từ server, kiểm tra extension và hủy download nếu vi phạm.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon blue">🧠</div>
-      <h3>Lớp 3 — Magika AI</h3>
-      <p>Đọc 4KB đầu của file và dùng mô hình AI để nhận dạng loại thực. File <code>.jpg</code> chứa nội dung EXE vẫn bị phát hiện.</p>
+    <div class="feature">
+      <div class="feature-icon">🧠</div>
+      <h3>Magika AI</h3>
+      <p>Nhận dạng file theo nội dung bytes — không phụ thuộc đuôi tên. File <code>virus.jpg</code> chứa EXE bytes vẫn bị phát hiện.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon green">☁️</div>
+    <div class="feature">
+      <div class="feature-icon">☁️</div>
       <h3>Remote Policy</h3>
-      <p>Cấu hình blocklist từ server trung tâm. Tự động sync theo chu kỳ — phù hợp triển khai doanh nghiệp.</p>
+      <p>Cấu hình blocklist từ server trung tâm, tự động sync theo chu kỳ — phù hợp triển khai doanh nghiệp.</p>
     </div>
   </div>
 
-  <hr class="divider">
+  <hr>
 
-  <!-- Magika labels -->
-  <div class="section-header">
-    <h2>🧠 Các Magika label phổ biến</h2>
-    <p>Thêm label này vào mục "MIME type / Magika label" để bắt file nguy hiểm dù đã đổi tên</p>
-  </div>
-
-  <table class="policy-table" style="margin-bottom:48px">
-    <thead>
-      <tr>
-        <th>Label</th>
-        <th>Loại file</th>
-        <th>Nguy hiểm?</th>
-        <th>Nên chặn?</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>exe</code></td>
-        <td>Windows Executable (.exe, .dll)</td>
-        <td>⚠️ Cao</td>
-        <td>✅ Nên chặn</td>
-      </tr>
-      <tr>
-        <td><code>elf</code></td>
-        <td>Linux Executable</td>
-        <td>⚠️ Cao</td>
-        <td>✅ Nên chặn</td>
-      </tr>
-      <tr>
-        <td><code>shell</code></td>
-        <td>Shell script (.sh, .bash)</td>
-        <td>⚠️ Cao</td>
-        <td>✅ Nên chặn</td>
-      </tr>
-      <tr>
-        <td><code>bat</code></td>
-        <td>Windows Batch file</td>
-        <td>⚠️ Cao</td>
-        <td>✅ Nên chặn</td>
-      </tr>
-      <tr>
-        <td><code>powershell</code></td>
-        <td>PowerShell script (.ps1)</td>
-        <td>⚠️ Cao</td>
-        <td>✅ Nên chặn</td>
-      </tr>
-      <tr>
-        <td><code>jar</code></td>
-        <td>Java Archive (.jar)</td>
-        <td>⚠️ Trung bình</td>
-        <td>⚠️ Tuỳ ngữ cảnh</td>
-      </tr>
-      <tr>
-        <td><code>vba</code></td>
-        <td>VBA macro (trong Office)</td>
-        <td>⚠️ Trung bình</td>
-        <td>⚠️ Tuỳ ngữ cảnh</td>
-      </tr>
-      <tr>
-        <td><code>pdf</code></td>
-        <td>PDF document</td>
-        <td>✅ Thấp</td>
-        <td>❌ Không cần</td>
-      </tr>
-      <tr>
-        <td><code>zip</code></td>
-        <td>ZIP archive</td>
-        <td>✅ Thấp</td>
-        <td>❌ Không cần</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <hr class="divider">
-
-  <!-- FAQ -->
-  <div class="section-header">
-    <h2>❓ Câu hỏi thường gặp</h2>
-  </div>
-
-  <div class="qa-list">
-    <div class="qa">
-      <div class="qa-q">Extension có gửi file lên server không?</div>
-      <div class="qa-a">Không. Magika chạy hoàn toàn trong trình duyệt bằng ONNX WASM. Dữ liệu file không rời khỏi máy tính của bạn.</div>
+  <h2>❓ Câu hỏi thường gặp</h2>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">Extension có gửi file lên server không?</div>
+      <div class="faq-a">Không. Magika chạy hoàn toàn trong trình duyệt. Dữ liệu file không rời khỏi máy.</div>
     </div>
-    <div class="qa">
-      <div class="qa-q">Tại sao chỉ đọc 4KB đầu file?</div>
-      <div class="qa-a">Magika chỉ cần header của file để nhận dạng loại — tương tự lệnh <code>file</code> trên Linux. Đọc ít byte hơn giúp không làm chậm trình duyệt, đặc biệt với file lớn.</div>
+    <div class="faq-item">
+      <div class="faq-q">Tắt extension tạm thời bằng cách nào?</div>
+      <div class="faq-a">Click icon 🛡️ → gạt toggle <strong>Bảo vệ DLP</strong> sang Tắt. Bật lại bất kỳ lúc nào.</div>
     </div>
-    <div class="qa">
-      <div class="qa-q">File bị đổi tên từ .exe thành .jpg có bị phát hiện không?</div>
-      <div class="qa-a">Có. Đây chính là điểm mạnh của Magika AI — nó đọc nội dung bytes thực của file, không tin vào extension. File <code>virus.jpg</code> chứa mã EXE vẫn bị phân loại là <code>exe</code> và bị chặn.</div>
-    </div>
-    <div class="qa">
-      <div class="qa-q">Extension có ảnh hưởng đến tốc độ upload không?</div>
-      <div class="qa-a">Rất nhỏ. Việc đọc 4KB và chạy Magika mất khoảng 50–200ms tuỳ thiết bị. Người dùng thường không nhận ra sự chênh lệch.</div>
-    </div>
-    <div class="qa">
-      <div class="qa-q">Nếu server Remote Policy không phản hồi thì sao?</div>
-      <div class="qa-a">Extension tiếp tục dùng chính sách local đã lưu. Sync thất bại sẽ được ghi log lỗi, không ảnh hưởng đến hoạt động bình thường.</div>
-    </div>
-    <div class="qa">
-      <div class="qa-q">Có thể tắt extension tạm thời không?</div>
-      <div class="qa-a">Có — click vào icon 🛡️ trên toolbar và gạt toggle <strong>Bảo vệ DLP</strong> sang Tắt. Extension vẫn chạy nhưng không chặn gì. Bật lại bất kỳ lúc nào.</div>
+    <div class="faq-item">
+      <div class="faq-q">Policy thay đổi nhưng không áp dụng?</div>
+      <div class="faq-a">Nhấn <strong>Lưu cấu hình</strong> sau mỗi thay đổi. Policy được áp dụng ngay lập tức sau khi lưu.</div>
     </div>
   </div>
 
-  <!-- CTA -->
   <div class="cta">
     <h2>Sẵn sàng cấu hình?</h2>
-    <p>Thêm domain và loại file cần chặn để bắt đầu bảo vệ dữ liệu</p>
+    <p>Mở trang Options để chọn định dạng file cần chặn</p>
     <div class="cta-buttons">
-      <button class="btn-cta btn-cta-white" id="open-options">⚙️ Mở cấu hình</button>
-      <button class="btn-cta btn-cta-outline" id="open-popup">🛡️ Xem trạng thái</button>
+      <button class="btn btn-white" id="open-options">⚙️ Mở cấu hình</button>
+      <button class="btn btn-outline" id="open-popup">🛡️ Xem trạng thái</button>
     </div>
   </div>
 

@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { loadPolicy, savePolicy, syncRemotePolicy, DEFAULT_POLICY } from '../background/policy.js';
+import { loadPolicy, savePolicy, syncRemotePolicy, DEFAULT_POLICY, FILE_TYPE_GROUPS } from '../background/policy.js';
 
 let policy = null;
 
@@ -23,16 +23,121 @@ function render() {
   $('enabled').checked = policy.enabled;
   $('remote-url').value = policy.remoteUrl || '';
   $('sync-interval').value = Math.round((policy.syncIntervalSeconds || 3600) / 60);
-  renderTagList('domain-list', policy.blockedDomains, 'blockedDomains');
-  renderTagList('ext-list', policy.blockedExtensions, 'blockedExtensions');
-  renderTagList('mime-list', policy.blockedMimeTypes, 'blockedMimeTypes');
+  renderTagList('domain-list', getList('allowedDomains'), 'allowedDomains');
+  renderTypeGroups('upload-groups', 'upload.blockedTypes');
+  renderTypeGroups('download-groups', 'download.blockedTypes');
 }
 
-function renderTagList(containerId, items, key) {
+function renderTypeGroups(containerId, path) {
+  const container = $(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const checked = new Set(getList(path));
+
+  FILE_TYPE_GROUPS.forEach((group) => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'type-group';
+
+    const header = document.createElement('div');
+    header.className = 'type-group-header';
+
+    const allChecked = group.types.every((t) => checked.has(t.label));
+    const someChecked = group.types.some((t) => checked.has(t.label));
+
+    const masterCb = document.createElement('input');
+    masterCb.type = 'checkbox';
+    masterCb.checked = allChecked;
+    masterCb.indeterminate = !allChecked && someChecked;
+    masterCb.addEventListener('change', () => {
+      group.types.forEach((t) => {
+        const cb = container.querySelector(`input[data-label="${t.label}"][data-path="${path}"]`);
+        if (cb) cb.checked = masterCb.checked;
+      });
+      syncCheckboxesToPolicy(container, path);
+    });
+
+    const title = document.createElement('span');
+    title.textContent = group.name;
+    title.className = 'type-group-title';
+
+    header.appendChild(masterCb);
+    header.appendChild(title);
+    groupEl.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'type-grid';
+
+    group.types.forEach((t) => {
+      const label = document.createElement('label');
+      label.className = 'type-item';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.label = t.label;
+      cb.dataset.path = path;
+      cb.checked = checked.has(t.label);
+      cb.addEventListener('change', () => {
+        syncCheckboxesToPolicy(container, path);
+        const allNow = group.types.every((x) => {
+          const c = container.querySelector(`input[data-label="${x.label}"][data-path="${path}"]`);
+          return c?.checked;
+        });
+        const someNow = group.types.some((x) => {
+          const c = container.querySelector(`input[data-label="${x.label}"][data-path="${path}"]`);
+          return c?.checked;
+        });
+        masterCb.checked = allNow;
+        masterCb.indeterminate = !allNow && someNow;
+      });
+
+      const name = document.createElement('span');
+      name.textContent = t.desc;
+
+      const code = document.createElement('code');
+      code.textContent = t.label;
+      code.className = 'type-label-code';
+
+      label.appendChild(cb);
+      label.appendChild(name);
+      label.appendChild(code);
+      grid.appendChild(label);
+    });
+
+    groupEl.appendChild(grid);
+    container.appendChild(groupEl);
+  });
+}
+
+function syncCheckboxesToPolicy(container, path) {
+  const selected = [];
+  container.querySelectorAll(`input[type=checkbox][data-path="${path}"]`).forEach((cb) => {
+    if (cb.checked) selected.push(cb.dataset.label);
+  });
+  setList(path, selected);
+}
+
+function getList(path) {
+  const parts = path.split('.');
+  let obj = policy;
+  for (const p of parts) obj = obj?.[p];
+  return Array.isArray(obj) ? obj : [];
+}
+
+function setList(path, value) {
+  const parts = path.split('.');
+  let obj = policy;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!obj[parts[i]]) obj[parts[i]] = {};
+    obj = obj[parts[i]];
+  }
+  obj[parts[parts.length - 1]] = value;
+}
+
+function renderTagList(containerId, items, path) {
   const container = $(containerId);
   if (!container) return;
 
-  // Đảm bảo items luôn là array
   const list = Array.isArray(items) ? items : [];
 
   if (!list.length) {
@@ -53,8 +158,10 @@ function renderTagList(containerId, items, key) {
     removeBtn.title = 'Xóa';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', () => {
-      policy[key].splice(i, 1);
-      renderTagList(containerId, policy[key], key);
+      const arr = getList(path);
+      arr.splice(i, 1);
+      setList(path, arr);
+      renderTagList(containerId, arr, path);
     });
 
     tag.appendChild(label);
@@ -114,18 +221,18 @@ function renderLog() {
 
 // ── Add / remove items ───────────────────────────────────────────────────────
 
-function addItem(inputId, key, listId) {
+function addItem(inputId, path, listId) {
   const input = $(inputId);
   if (!input) return;
 
   const val = input.value.trim();
   if (!val) return;
 
-  if (!Array.isArray(policy[key])) policy[key] = [];
-
-  if (!policy[key].includes(val)) {
-    policy[key].push(val);
-    renderTagList(listId, policy[key], key);
+  const arr = getList(path);
+  if (!arr.includes(val)) {
+    arr.push(val);
+    setList(path, arr);
+    renderTagList(listId, arr, path);
   }
   input.value = '';
   input.focus();
@@ -166,10 +273,10 @@ function initNav() {
 function bindEvents() {
   // Domain
   $('add-domain')?.addEventListener('click', () =>
-    addItem('domain-input', 'blockedDomains', 'domain-list')
+    addItem('domain-input', 'allowedDomains', 'domain-list')
   );
   $('domain-input')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addItem('domain-input', 'blockedDomains', 'domain-list');
+    if (e.key === 'Enter') addItem('domain-input', 'allowedDomains', 'domain-list');
   });
 
   $('debug-ui')?.addEventListener('change', async () => {
@@ -188,21 +295,6 @@ function bindEvents() {
     }
   });
 
-  // Extension
-  $('add-ext')?.addEventListener('click', () =>
-    addItem('ext-input', 'blockedExtensions', 'ext-list')
-  );
-  $('ext-input')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addItem('ext-input', 'blockedExtensions', 'ext-list');
-  });
-
-  // MIME
-  $('add-mime')?.addEventListener('click', () =>
-    addItem('mime-input', 'blockedMimeTypes', 'mime-list')
-  );
-  $('mime-input')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addItem('mime-input', 'blockedMimeTypes', 'mime-list');
-  });
 
   // Save
   $('save-btn')?.addEventListener('click', async () => {

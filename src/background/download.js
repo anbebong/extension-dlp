@@ -1,82 +1,88 @@
 import browser from 'webextension-polyfill';
-import { loadPolicy, isDomainBlocked, isMimeTypeBlocked, logBlockEvent } from './policy.js';
-import { classifyBytes, labelToMime, resolveEffectiveLabel } from './magika.js';
+import { loadPolicy, isDomainAllowed, isMimeTypeBlocked, logBlockEvent } from './policy.js';
 
-const FETCH_FIRST_BYTES = 4096;
+// Map từ extension file → Magika label tương đương
+const EXT_TO_LABEL = {
+  // Tài liệu
+  '.pdf':  'pdf',
+  '.docx': 'docx', '.doc': 'ooxml', '.dotx': 'docx',
+  '.xlsx': 'xlsx', '.xls': 'ooxml', '.xlsb': 'xlsx',
+  '.pptx': 'pptx', '.ppt': 'ooxml',
+  '.odt':  'odt',  '.ods': 'ods',   '.odp': 'odp',
+  '.rtf':  'rtf',  '.csv': 'csv',
+  // Hình ảnh
+  '.jpg': 'jpeg', '.jpeg': 'jpeg', '.png': 'png',
+  '.gif': 'gif',  '.bmp': 'bmp',   '.tiff': 'tiff', '.tif': 'tiff',
+  '.webp': 'webp', '.svg': 'svg',  '.psd': 'psd',
+  // Video / Audio
+  '.mp4': 'mp4', '.mkv': 'mkv', '.avi': 'avi',
+  '.mp3': 'mp3', '.wav': 'wav', '.flac': 'flac',
+  // Archive
+  '.zip': 'zip', '.rar': 'rar', '.7z': 'sevenzip',
+  '.gz': 'gzip', '.tar': 'tar',
+  // Executable / Script
+  '.exe': 'pebin', '.dll': 'pebin', '.sys': 'pebin',
+  '.sh':  'shell', '.bash': 'shell',
+  '.bat': 'batch', '.cmd': 'batch',
+  '.ps1': 'powershell',
+  '.jar': 'jar', '.apk': 'apk',
+  // Dữ liệu nhạy cảm
+  '.db': 'sqlite', '.sqlite': 'sqlite',
+  '.pem': 'pem', '.key': 'pem', '.crt': 'pem',
+  '.eml': 'eml', '.pst': 'outlook', '.ost': 'outlook',
+};
 
 export function initDownloadBlocker() {
-  browser.downloads.onCreated.addListener(handleDownloadCreated);
+  // onDeterminingFilename fired sau khi server trả Content-Disposition — có tên file thật
+  chrome.downloads.onDeterminingFilename.addListener(handleDeterminingFilename);
 }
 
-async function handleDownloadCreated(downloadItem) {
-  const policy = await loadPolicy();
-  if (!policy.enabled) return;
-
+function handleDeterminingFilename(downloadItem, suggest) {
   const { id, filename } = downloadItem;
   const url = downloadItem.finalUrl || downloadItem.url;
 
-  // Kiểm tra domain
-  if (isDomainBlocked(url, policy)) {
-    await cancelDownload(id, {
-      type: 'download',
-      reason: 'blocked_domain',
-      url,
-      filename,
-    });
-    return;
-  }
+  console.log(`[DLP] download filename resolved: "${filename}" from ${url}`);
 
-  let resumeAfter = false;
-  try {
-    await browser.downloads.pause(id);
-    resumeAfter = true;
-  } catch {
-    /* một số download không pause được */
-  }
+  // Gọi suggest ngay để Chrome không timeout, rồi cancel async nếu cần
+  suggest({ filename });
 
-  try {
-    const bytes = await fetchFirstBytes(url);
-    if (bytes && bytes.length > 0) {
-      const magika = await classifyBytes(bytes);
-      const label = resolveEffectiveLabel(bytes, magika.label);
-      const mime = labelToMime(label);
-      if (isMimeTypeBlocked(mime, policy) || isMimeTypeBlocked(label, policy)) {
-        await cancelDownload(id, {
-          type: 'download',
-          reason: 'blocked_filetype',
-          detectedType: label,
-          url,
-          filename,
-        });
-        resumeAfter = false;
-        return;
-      }
-    }
-  } finally {
-    if (resumeAfter) {
-      try {
-        await browser.downloads.resume(id);
-      } catch {
-        /* đã xong */
-      }
-    }
-  }
+  checkAndBlock(id, filename, url);
 }
 
-async function cancelDownload(downloadId, event) {
-  try {
-    await browser.downloads.cancel(downloadId);
-  } catch {
-    // Download có thể đã hoàn thành trước khi cancel
+async function checkAndBlock(id, filename, url) {
+  const policy = await loadPolicy();
+  if (!policy.enabled) return false;
+
+  if (isDomainAllowed(url, policy)) {
+    console.log(`[DLP] download allowed (domain whitelist): ${url}`);
+    return false;
   }
 
-  await logBlockEvent(event);
-  await showBlockNotification(event);
+  const ext = getExt(filename).toLowerCase();
+  const label = EXT_TO_LABEL[ext];
+
+  console.log(`[DLP] download check: ext="${ext}" → label="${label}"`);
+
+  if (label && isMimeTypeBlocked(label, policy, 'download')) {
+    console.log(`[DLP] download BLOCKED: "${filename}" (${label})`);
+    try {
+      await browser.downloads.cancel(id);
+    } catch { /* có thể đã xong */ }
+    await logBlockEvent({ type: 'download', reason: 'blocked_filetype', detectedType: label, url, filename });
+    await showBlockNotification({ reason: 'blocked_filetype', detectedType: label });
+    return true;
+  }
+
+  return false;
+}
+
+function getExt(filename) {
+  const i = (filename || '').lastIndexOf('.');
+  return i >= 0 ? filename.slice(i) : '';
 }
 
 async function showBlockNotification(event) {
   const messages = {
-    blocked_domain: `Download bị chặn: domain nguy hiểm`,
     blocked_extension: `Download bị chặn: loại file không được phép`,
     blocked_filetype: `Download bị chặn: nội dung file nguy hiểm (${event.detectedType})`,
   };
@@ -93,46 +99,3 @@ async function showBlockNotification(event) {
   }
 }
 
-async function fetchFirstBytes(url) {
-  if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) return null;
-
-  const base = { credentials: 'omit', cache: 'no-store' };
-  const slice = (buf) => {
-    const u = new Uint8Array(buf);
-    return u.byteLength > FETCH_FIRST_BYTES ? u.slice(0, FETCH_FIRST_BYTES) : u;
-  };
-
-  try {
-    const res = await fetch(url, {
-      ...base,
-      headers: { Range: `bytes=0-${FETCH_FIRST_BYTES - 1}` },
-    });
-    if (res.ok) {
-      const buf = await res.arrayBuffer();
-      const out = slice(buf);
-      if (out.length > 0) return out;
-    }
-  } catch {
-    /* nhiều server không hỗ trợ Range hoặc chặn Range — thử GET */
-  }
-
-  try {
-    const res = await fetch(url, base);
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    const out = slice(buf);
-    if (out.length > 0) return out;
-  } catch {
-    /* thử kèm cookie (một số link chỉ tải được khi đã đăng nhập) */
-  }
-
-  try {
-    const res = await fetch(url, { ...base, credentials: 'include' });
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    const out = slice(buf);
-    return out.length > 0 ? out : null;
-  } catch {
-    return null;
-  }
-}
